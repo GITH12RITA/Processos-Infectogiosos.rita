@@ -41,6 +41,18 @@ function scene:create( event )
 
     end)
 
+    local agente = display.newImageRect(sceneGroup, "/assets/agente.png", 186, 191)
+    agente.x = 400
+    agente.y = 868
+    
+    agente:addEventListener("tap", function (event)
+        composer.gotoScene("interacao3", {
+            effect = "fade",
+            time = 500
+        });
+
+    end)
+
 
     local function createDraggableSquare(event)
         if event.phase == "began" then
