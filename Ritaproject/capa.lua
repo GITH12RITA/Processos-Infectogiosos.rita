@@ -4,7 +4,7 @@ local scene = composer.newScene()
 local MARGIN = 90
 
 -- Variáveis de controle de áudio
-local narracao = audio.loadStream("narracao/audio1.mp3")
+local narracao = audio.loadStream("narracao/audio1.m4a")
 local somLigado = true
 local somAtivo = nil
 local botaosom -- Botão de som
