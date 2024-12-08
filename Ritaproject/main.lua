@@ -8,4 +8,4 @@
 
 local composer = require ("composer")
 
-composer.gotoScene("pagina4")
+composer.gotoScene("capa")
