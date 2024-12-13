@@ -3,6 +3,28 @@ local scene = composer.newScene()
 
 local MARGIN = 90
 
+-- Variáveis para o som
+local narracao = audio.loadStream("narracao/audio4.m4a")
+local somLigado = true
+local somAtivo = nil
+local botaosom -- Variável para o botão de som
+
+-- Função para alternar o som
+local function alternarSom()
+    if somLigado then
+        somLigado = false
+        if somAtivo then
+            audio.stop(somAtivo)
+            somAtivo = nil
+        end
+        botaosom.fill = { type = "image", filename = "/assets/Somdesligado.png" } -- Atualiza para imagem de som desligado
+    else
+        somLigado = true
+        somAtivo = audio.play(narracao, { loops = -1 })
+        botaosom.fill = { type = "image", filename = "/assets/som.png" } -- Atualiza para imagem de som ligado
+    end
+end
+
 function scene:create(event)
     local sceneGroup = self.view
 
@@ -16,15 +38,15 @@ function scene:create(event)
     homem.x = display.contentCenterX + 200
     homem.y = display.contentCenterY
 
-    -- Imagem do Homem
-        local ferida = display.newImageRect(sceneGroup, "assets/ferida.png", 45,45)
-        ferida.x = display.contentCenterX +273
-        ferida.y = display.contentCenterY -130
+    -- Imagem do ferida
+    local ferida = display.newImageRect(sceneGroup, "assets/ferida.png", 45, 45)
+    ferida.x = display.contentCenterX + 273
+    ferida.y = display.contentCenterY - 130
 
-        -- Imagem do Homem
+    -- Imagem do corte
     local corte = display.newImageRect(sceneGroup, "assets/corte.png", 40, 45)
-    corte.x = display.contentCenterX +175
-    corte.y = display.contentCenterY+ 45
+    corte.x = display.contentCenterX + 175
+    corte.y = display.contentCenterY + 45
 
     -- Grupos para pontos verdes e amarelos
     local grupoVerde = display.newGroup()
@@ -43,22 +65,21 @@ function scene:create(event)
     end
 
     -- Criando pontos verdes (portas de entrada)
-    criarPonto(grupoVerde, homem.x, homem.y - 200, "verde") --boca
+    criarPonto(grupoVerde, homem.x, homem.y - 200, "verde") -- Boca
     criarPonto(grupoVerde, homem.x, homem.y - 220, "verde") -- Nariz
-    criarPonto(grupoVerde, homem.x -15, homem.y - 240, "verde") -- Olhos
-    criarPonto(grupoVerde, homem.x +20, homem.y - 240, "verde") -- Olhos
-    criarPonto(grupoVerde, homem.x, homem.y -80, "verde") -- Estômago
-    criarPonto(grupoVerde, homem.x, homem.y -10, "verde") -- Trato urinário
-    criarPonto(grupoVerde, homem.x -20, homem.y +40, "verde") -- Corte na perna
-    criarPonto(grupoVerde, homem.x + 80 , homem.y -120, "verde") -- braço
-
+    criarPonto(grupoVerde, homem.x - 15, homem.y - 240, "verde") -- Olhos
+    criarPonto(grupoVerde, homem.x + 20, homem.y - 240, "verde") -- Olhos
+    criarPonto(grupoVerde, homem.x, homem.y - 80, "verde") -- Estômago
+    criarPonto(grupoVerde, homem.x, homem.y - 10, "verde") -- Trato urinário
+    criarPonto(grupoVerde, homem.x - 20, homem.y + 40, "verde") -- Corte na perna
+    criarPonto(grupoVerde, homem.x + 80, homem.y - 120, "verde") -- Braço
 
     -- Criando pontos amarelos (portas de saída)
     criarPonto(grupoAmarelo, homem.x, homem.y - 220, "amarelo") -- Nariz
-    criarPonto(grupoAmarelo, homem.x, homem.y - 200, "amarelo") -- boca
-    criarPonto(grupoAmarelo, homem.x-20, homem.y +40, "amarelo") -- corte na perna
+    criarPonto(grupoAmarelo, homem.x, homem.y - 200, "amarelo") -- Boca
+    criarPonto(grupoAmarelo, homem.x - 20, homem.y + 40, "amarelo") -- Corte na perna
     criarPonto(grupoAmarelo, homem.x, homem.y - 10, "amarelo") -- Trato urinário
-    criarPonto(grupoAmarelo, homem.x + 80, homem.y - 120, "amarelo") -- braço
+    criarPonto(grupoAmarelo, homem.x + 80, homem.y - 120, "amarelo") -- Braço
 
     -- Inicialmente, ambos os grupos de pontos estão invisíveis
     grupoVerde.isVisible = false
@@ -89,14 +110,15 @@ function scene:create(event)
     botaoproximo:addEventListener("tap", function(event)
         composer.gotoScene("pagina5", {
             effect = "fade",
-            time = 500
+            time = 500,
         })
     end)
 
     -- Botão Som
-    local som = display.newImage(sceneGroup, "/assets/som.png")
-    som.x = display.contentWidth - som.width / 2 - MARGIN - 540
-    som.y = display.contentHeight - som.height - 860
+    botaosom = display.newImageRect(sceneGroup, "/assets/som.png", 80, 80)
+    botaosom.x = display.contentWidth - botaosom.width / 2 - MARGIN - 540
+    botaosom.y = display.contentHeight - botaosom.height - 860
+    botaosom:addEventListener("tap", alternarSom)
 
     -- Botão Anterior
     local botaoanterior = display.newImage(sceneGroup, "/assets/botaoanterior.png")
@@ -105,7 +127,7 @@ function scene:create(event)
     botaoanterior:addEventListener("tap", function(event)
         composer.gotoScene("pagina3", {
             effect = "fade",
-            time = 500
+            time = 500,
         })
     end)
 end
@@ -114,10 +136,10 @@ function scene:show(event)
     local sceneGroup = self.view
     local phase = event.phase
 
-    if (phase == "will") then
-        -- Código a executar antes de a cena aparecer
-    elseif (phase == "did") then
-        -- Código a executar após a cena aparecer
+    if phase == "did" then
+        if somLigado and not somAtivo then
+            somAtivo = audio.play(narracao, { loops = -1 })
+        end
     end
 end
 
@@ -125,16 +147,21 @@ function scene:hide(event)
     local sceneGroup = self.view
     local phase = event.phase
 
-    if (phase == "will") then
-        -- Código a executar antes de a cena desaparecer
-    elseif (phase == "did") then
-        -- Código a executar após a cena desaparecer
+    if phase == "will" then
+        if somAtivo then
+            audio.stop(somAtivo)
+            somAtivo = nil
+        end
     end
 end
 
 function scene:destroy(event)
     local sceneGroup = self.view
-    -- Código para limpar objetos e listeners da cena
+
+    if narracao then
+        audio.dispose(narracao)
+        narracao = nil
+    end
 end
 
 scene:addEventListener("create", scene)
