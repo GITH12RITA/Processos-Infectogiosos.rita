@@ -18,60 +18,75 @@ local function alternarSom()
             audio.stop(somAtivo)
             somAtivo = nil
         end
-        botaosom.fill = { type = "image", filename = "assets/Somdesligado.png" } -- Atualiza para imagem de som desligado
+        botaosom.fill = { type = "image", filename = "assets/Somdesligado.png" }
     else
         somLigado = true
         somAtivo = audio.play(narracao, { loops = -1 })
-        botaosom.fill = { type = "image", filename = "assets/som.png" } -- Atualiza para imagem de som ligado
+        botaosom.fill = { type = "image", filename = "assets/som.png" }
     end
+end
+
+-- Função para adicionar sangue e capturar os parâmetros do evento touch
+local function adicionarSangue(event)
+    print("Phase: " .. event.phase)
+    print("Location: " .. tostring(event.x) .. "," .. tostring(event.y))
+    print("Unique touch ID: " .. tostring(event.id))
+    print("----------")
+
+    if event.phase == "began" and math.abs(event.x - 649.5) < 50 and math.abs(event.y - 901.5) < 50 then
+        local sangue = display.newImageRect(scene.view, "assets/sangue.png", 50, 50)
+        sangue.x = 649.5
+        sangue.y = 901.5
+        print("Sangue adicionado na perna")
+    end
+    return true
 end
 
 function scene:create(event)
     local sceneGroup = self.view
 
+    -- Ativa multitouch
+    system.activate("multitouch")
+
+    -- Fundo da tela
     local backgroud = display.newImageRect(sceneGroup, "assets/p6.png", 768, 1024)
     backgroud.x = display.contentCenterX
     backgroud.y = display.contentCenterY
 
-    local botaoproximo = display.newImage(sceneGroup, "/assets/botaoproximo.png")
+    -- Imagem da perna (exemplo)
+    local pernaImagem = display.newImageRect(sceneGroup, "assets/imagem.png", 685, 346)
+    pernaImagem.x = display.contentCenterX
+    pernaImagem.y = display.contentHeight - 350
+
+    -- Adiciona evento de toque ao fundo
+    backgroud:addEventListener("touch", adicionarSangue)
+
+    -- Botão próximo
+    local botaoproximo = display.newImage(sceneGroup, "assets/botaoproximo.png")
     botaoproximo.x = display.contentWidth - botaoproximo.width / 2 - MARGIN
     botaoproximo.y = display.contentHeight - botaoproximo.height / 2 - MARGIN
-
     botaoproximo:addEventListener("tap", function(event)
-        composer.gotoScene("contracapa", {
-            effect = "fade",
-            time = 500
-        })
+        composer.gotoScene("contracapa", { effect = "fade", time = 500 })
     end)
 
-    local botaoanterior = display.newImage(sceneGroup, "/assets/botaoanterior.png")
+    -- Botão anterior
+    local botaoanterior = display.newImage(sceneGroup, "assets/botaoanterior.png")
     botaoanterior.x = display.contentWidth - botaoanterior.width / 2 - MARGIN - 500
     botaoanterior.y = display.contentHeight - botaoanterior.height / 2 - MARGIN
-
     botaoanterior:addEventListener("tap", function(event)
-        composer.gotoScene("pagina5", {
-            effect = "fade",
-            time = 500
-        })
+        composer.gotoScene("pagina5", { effect = "fade", time = 500 })
     end)
 
     -- Adicionando o botão de som
     botaosom = display.newImage(sceneGroup, "assets/som.png")
     botaosom.x = display.contentWidth - botaosom.width / 2 - MARGIN - 540
     botaosom.y = display.contentHeight - botaosom.height - 860
-
-    -- Adicionando o evento de toque no botão de som
     botaosom:addEventListener("tap", alternarSom)
 end
 
 function scene:show(event)
-    local sceneGroup = self.view
     local phase = event.phase
-
-    if phase == "will" then
-        
-    elseif phase == "did" then
-        -- Garantir que o som comece a tocar automaticamente, se necessário
+    if phase == "did" then
         if somLigado and not somAtivo then
             somAtivo = audio.play(narracao, { loops = -1 })
         end
@@ -79,23 +94,16 @@ function scene:show(event)
 end
 
 function scene:hide(event)
-    local sceneGroup = self.view
     local phase = event.phase
-
     if phase == "will" then
-        
         if somAtivo then
             audio.stop(somAtivo)
             somAtivo = nil
         end
-    elseif phase == "did" then
-        
     end
 end
 
 function scene:destroy(event)
-    local sceneGroup = self.view
-
     if narracao then
         audio.dispose(narracao)
         narracao = nil
