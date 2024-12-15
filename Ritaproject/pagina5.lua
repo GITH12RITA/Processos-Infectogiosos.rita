@@ -151,7 +151,14 @@ function scene:hide(event)
     local phase = event.phase
 
     if (phase == "will") then
+        -- Remove o listener do acelerômetro
         Runtime:removeEventListener("accelerometer", onAccelerometer)
+
+        -- Para a narração e libera o canal de áudio
+        if somAtivo then
+            audio.stop(somAtivo)
+            somAtivo = nil
+        end
     end
 end
 
