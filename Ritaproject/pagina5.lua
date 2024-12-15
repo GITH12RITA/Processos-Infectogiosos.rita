@@ -1,8 +1,36 @@
 local composer = require("composer")
-
-local scene = composer.newScene()
+local scene = composer.newScene() -- Garante que a cena seja inicializada corretamente
 
 local MARGIN = 90
+
+-- Variáveis de controle de áudio
+local narracao = audio.loadStream("narracao/audio5.m4a")
+local somLigado = true
+local somAtivo = nil
+local botaosom -- Botão de som
+
+-- Função para atualizar a imagem do botão de som
+local function atualizarImagemBotaoSom()
+    local imagem = somLigado and "assets/som.png" or "assets/somdesligado.png"
+    if botaosom then
+        botaosom.fill = { type = "image", filename = imagem }
+    end
+end
+
+-- Função para alternar o estado do som
+local function alternarSom()
+    if somLigado then
+        somLigado = false
+        if somAtivo then
+            audio.stop(somAtivo)
+            somAtivo = nil
+        end
+    else
+        somLigado = true
+        somAtivo = audio.play(narracao, { loops = -1 })
+    end
+    atualizarImagemBotaoSom()
+end
 
 local function criarEfeitoDePoeira(x, y)
     local poeira = display.newImageRect("assets/poeira.png", 100, 100)
@@ -24,14 +52,14 @@ local function criarEfeitoDeCatarro()
     catarro.x = 670
     catarro.y = 264
 
-    local velocidade = math.random(800, 1500) -- Velocidade aleatória entre 800ms e 1500ms
-    local deslocamentoX = math.random(-50, 50) -- Deslocamento lateral aleatório
+    local velocidade = math.random(800, 1500)
+    local deslocamentoX = math.random(-50, 50)
 
     transition.to(catarro, {
         time = velocidade,
         alpha = 0,
         x = catarro.x + deslocamentoX,
-        y = display.contentHeight + 50, -- Faz o catarro cair para fora da tela
+        y = display.contentHeight + 50,
         onComplete = function()
             display.remove(catarro)
         end
@@ -39,7 +67,7 @@ local function criarEfeitoDeCatarro()
 end
 
 local function criarPoeirasAleatorias()
-    for i = 1, 30 do -- Ajuste o número de poeiras aqui
+    for i = 1, 30 do
         local x = math.random(0, display.contentWidth)
         local y = math.random(0, display.contentHeight)
         criarEfeitoDePoeira(x, y)
@@ -47,8 +75,8 @@ local function criarPoeirasAleatorias()
 end
 
 local function criarCatarrosFixos()
-    for i = 1, 20 do -- Ajuste o número de catarros aqui
-        timer.performWithDelay(i * 300, function() -- Atraso entre os catarros
+    for i = 1, 20 do
+        timer.performWithDelay(i * 300, function()
             criarEfeitoDeCatarro()
         end)
     end
@@ -85,9 +113,17 @@ function scene:create(event)
         })
     end)
 
-    local som = display.newImage(sceneGroup, "/assets/som.png")
-    som.x = display.contentWidth - som.width / 2 - MARGIN - 540
-    som.y = display.contentHeight - som.height - 860
+    botaosom = display.newImageRect(sceneGroup, "assets/som.png", 80,80)
+    botaosom.x = display.contentWidth - botaosom.width / 2 - MARGIN - 540
+    botaosom.y = display.contentHeight - botaosom.height - 880
+
+    botaosom:addEventListener("tap", alternarSom) -- Evento para alternar som
+    atualizarImagemBotaoSom() -- Atualiza a imagem inicial do botão de som
+
+    -- Inicia a narração apenas se o som estiver ligado
+    if somLigado then
+        somAtivo = audio.play(narracao, { loops = -1 })
+    end
 
     local botaoanterior = display.newImage(sceneGroup, "/assets/botaoanterior.png")
     botaoanterior.x = display.contentWidth - botaoanterior.width / 2 - MARGIN - 510
